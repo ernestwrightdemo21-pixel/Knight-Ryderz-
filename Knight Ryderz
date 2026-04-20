@@ -1,0 +1,107 @@
+// Knight Ryderz Chess Club – FULL SYSTEM (Auth + Database Ready) // This version prepares your app for: // ✅ Real accounts // ✅ Auto membership approval // ✅ Leaderboard // ✅ Payments tracking
+
+import React, { useState, useEffect } from "react";
+
+// ⚠️ You will connect Firebase later
+
+export default function App() { const [user, setUser] = useState(null); const [users, setUsers] = useState([]); const [name, setName] = useState(""); const [password, setPassword] = useState("");
+
+// Fake database (replace with Firebase) useEffect(() => { const savedUsers = JSON.parse(localStorage.getItem("users")) || []; setUsers(savedUsers); }, []);
+
+const saveUsers = (newUsers) => { setUsers(newUsers); localStorage.setItem("users", JSON.stringify(newUsers)); };
+
+// REGISTER const register = () => { const newUser = { name, password, isMember: false, rating: 1200, wins: 0, };
+
+const updated = [...users, newUser];
+saveUsers(updated);
+alert("Account created. Now login.");
+
+};
+
+// LOGIN const login = () => { const found = users.find( (u) => u.name === name && u.password === password );
+
+if (found) {
+  setUser(found);
+} else {
+  alert("Invalid login");
+}
+
+};
+
+// AUTO APPROVE (simulate payment) const becomeMember = () => { const updatedUsers = users.map((u) => { if (u.name === user.name) { return { ...u, isMember: true }; } return u; });
+
+saveUsers(updatedUsers);
+setUser({ ...user, isMember: true });
+
+window.open("https://paypal.me/EWright2276/20", "_blank");
+
+};
+
+// LEADERBOARD SORT const leaderboard = [...users].sort((a, b) => b.rating - a.rating);
+
+// NOT LOGGED IN if (!user) { return ( <div className="p-4"> <h1>Knight Ryderz Chess Club ♟️</h1>
+
+<input
+      placeholder="Username"
+      onChange={(e) => setName(e.target.value)}
+    />
+    <input
+      type="password"
+      placeholder="Password"
+      onChange={(e) => setPassword(e.target.value)}
+    />
+
+    <button onClick={login}>Login</button>
+    <button onClick={register}>Register</button>
+
+    <hr />
+
+    <p>Join the club to compete & win money 💰</p>
+  </div>
+);
+
+}
+
+// NOT MEMBER if (!user.isMember) { return ( <div className="p-4"> <h2>Welcome {user.name}</h2> <p>❌ Not a member</p>
+
+<button onClick={becomeMember}>
+      Join Club - $20/month
+    </button>
+  </div>
+);
+
+}
+
+// MEMBER DASHBOARD return ( <div className="p-4"> <h2>Welcome {user.name} ✅</h2> <p>Rating: {user.rating}</p> <p>Wins: {user.wins}</p>
+
+<hr />
+
+  <h3>Weekly Tournament</h3>
+  <button
+    onClick={() =>
+      window.open("https://paypal.me/EWright2276/5", "_blank")
+    }
+  >
+    Enter Tournament ($5)
+  </button>
+
+  <hr />
+
+  <h3>Leaderboard 🏆</h3>
+  {leaderboard.map((u, i) => (
+    <p key={i}>
+      {i + 1}. {u.name} - {u.rating}
+    </p>
+  ))}
+
+  <hr />
+
+  <h3>Notifications 🔔</h3>
+  <button
+    onClick={() => alert("Notifications coming soon!")}
+  >
+    Enable Notifications
+  </button>
+</div>
+
+); }
