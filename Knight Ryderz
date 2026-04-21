@@ -6,26 +6,29 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   // 🔐 LOGIN
-  const login = () => {
-    if (!name) return;
+  const handleLogin = () => {
+    if (!name.trim()) return;
     setUser(name);
     setName("");
   };
 
-  const logout = () => {
+  const handleLogout = () => {
     setUser(null);
   };
 
   // ➕ ADD MEMBER
   const addMember = () => {
-    if (!name) return;
+    if (!name.trim()) return;
 
-    const newMember = {
-      name,
-      paid: false,
-    };
+    setMembers([
+      ...members,
+      {
+        name,
+        paid: false,
+        joined: new Date().toLocaleDateString(),
+      },
+    ]);
 
-    setMembers([...members, newMember]);
     setName("");
   };
 
@@ -38,35 +41,79 @@ export default function App() {
 
   // ❌ REMOVE MEMBER
   const removeMember = (index) => {
-    const updated = members.filter((_, i) => i !== index);
-    setMembers(updated);
+    setMembers(members.filter((_, i) => i !== index));
   };
 
-  // 🔒 LOCK APP IF NOT LOGGED IN
+  // 🔒 LOGIN SCREEN
   if (!user) {
     return (
-      <div style={{ padding: 20 }}>
-        <h2>Knight Ryderz Chess Club ♟️</h2>
+      <div style={{ padding: 20, fontFamily: "Arial" }}>
+        <h1>Knight Ryderz Chess Club ♟️</h1>
+        <p>Enter your name to access the club dashboard</p>
+
         <input
-          placeholder="Enter your name"
+          placeholder="Your name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          style={{ padding: 8, marginRight: 10 }}
         />
-        <button onClick={login}>Enter</button>
+
+        <button onClick={handleLogin}>Enter</button>
       </div>
     );
   }
 
+  // 🧠 DASHBOARD
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Dashboard</h2>
+    <div style={{ padding: 20, fontFamily: "Arial" }}>
+      <h1>♟️ Knight Ryderz Dashboard</h1>
       <p>Welcome, {user}</p>
-      <button onClick={logout}>Logout</button>
+
+      <button onClick={handleLogout}>Logout</button>
 
       <hr />
 
-      <h3>Add Member</h3>
+      <h2>Add Member</h2>
       <input
         placeholder="Member name"
         value={name}
-        onChange={(e) => set
+        onChange={(e) => setName(e.target.value)}
+        style={{ padding: 8, marginRight: 10 }}
+      />
+      <button onClick={addMember}>Add</button>
+
+      <hr />
+
+      <h2>Members</h2>
+
+      {members.length === 0 && <p>No members yet</p>}
+
+      {members.map((m, i) => (
+        <div
+          key={i}
+          style={{
+            border: "1px solid #ccc",
+            padding: 10,
+            marginBottom: 10,
+            borderRadius: 8,
+          }}
+        >
+          <strong>{m.name}</strong>
+          <p>Joined: {m.joined}</p>
+          <p>Status: {m.paid ? "Active ✅" : "Inactive ❌"}</p>
+
+          <button onClick={() => togglePaid(i)}>
+            {m.paid ? "Mark Unpaid" : "Mark Paid"}
+          </button>
+
+          <button
+            onClick={() => removeMember(i)}
+            style={{ marginLeft: 10 }}
+          >
+            Remove
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
