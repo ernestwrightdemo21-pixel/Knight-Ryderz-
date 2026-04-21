@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Knight Ryderz Chess Club</title>
+</head>
+<body>
+
+<h1>Knight Ryderz Chess Club ♟️</h1>
+
+<input id="name" placeholder="Username"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+
+<div id="app"></div>
+
+<script>
+let user = null;
+
+function register() {
+  const name = document.getElementById("name").value;
+  const password = document.getElementById("password").value;
+
+  localStorage.setItem(name, JSON.stringify({
+    name,
+    password,
+    isMember: false
+  }));
+
+  alert("Account created!");
+}
+
+function login() {
+  const name = document.getElementById("name").value;
+  const password = document.getElementById("password").value;
+
+  const saved = JSON.parse(localStorage.getItem(name));
+
+  if (saved && saved.password === password) {
+    user = saved;
+    render();
+  } else {
+    alert("Login failed");
+  }
+}
+
+function joinClub() {
+  window.open("https://paypal.me/EWright2276/20", "_blank");
+}
+
+function render() {
+  const app = document.getElementById("app");
+
+  if (!user.isMember) {
+    app.innerHTML = `
+      <h2>Welcome ${user.name}</h2>
+      <p>❌ Not a member</p>
+
+      <button onclick="joinClub()">Join Club - $20</button>
+
+      <br><br>
+
+      <input type="file" id="proof"><br><br>
+      <button onclick="submitProof()">Submit Payment Proof</button>
+    `;
+  } else {
+    app.innerHTML = `
+      <h2>Welcome ${user.name} ✅</h2>
+      <p>You are a member</p>
+    `;
+  }
+}
+
+function submitProof() {
+  const file = document.getElementById("proof").files[0];
+
+  if (!file) {
+    alert("Upload proof first");
+    return;
+  }
+
+  alert("Proof submitted. Waiting for approval.");
+}
+</script>
+
+</body>
+</html>
