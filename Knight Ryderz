@@ -1,4 +1,103 @@
-// import React, { useState } from "react";
+// import React, { useState, useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc
+} from "firebase/firestore";
+
+// 🔥 PASTE YOUR FIREBASE CONFIG HERE
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_MSG_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [players, setPlayers] = useState([]);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (u) => {
+      if (u) setUser(u);
+    });
+    loadPlayers();
+  }, []);
+
+  const signup = async () => {
+    await createUserWithEmailAndPassword(auth, email, password);
+    alert("Account created!");
+  };
+
+  const login = async () => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const loadPlayers = async () => {
+    const snapshot = await getDocs(collection(db, "players"));
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setPlayers(data);
+  };
+
+  const addWin = async (player) => {
+    const ref = doc(db, "players", player.id);
+    await updateDoc(ref, {
+      wins: player.wins + 1,
+      elo: player.elo + 10
+    });
+    loadPlayers();
+  };
+
+  if (!user) {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Login / Sign Up</h2>
+        <input
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          placeholder="Password"
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <br /><br />
+        <button onClick={signup}>Sign Up</button>
+        <button onClick={login}>Login</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>🏆 Leaderboard</h2>
+      {players.map((p, i) => (
+        <div key={p.id} style={{ marginBottom: 10 }}>
+          #{i + 1} {p.name} — {p.elo} ELO ({p.wins}W)
+          <button onClick={() => addWin(p)}>+ Win</button>
+        </div>
+      ))}
+    </div>
+  );
+} React, { useState } from "react";
 
 export default function App() {
   const [members, setMembers] = useState([]);
